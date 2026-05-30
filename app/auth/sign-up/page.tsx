@@ -10,7 +10,6 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,17 +21,10 @@ export default function SignUpPage() {
         email,
         password,
         name,
-        fetchOptions: {
-          onError: (ctx) => {
-            setError(ctx.error.message || "An error occurred during sign-up.");
-          },
-          onSuccess: () => {
-            router.push("/");
-          },
-        },
+        callbackURL: "/",
       });
     } catch (err) {
-      setError("An unexpected error occurred.");
+      setError("An unexpected error occurred during sign up.");
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +34,7 @@ export default function SignUpPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md p-4">
         <div className="mb-4 flex justify-center">
-          <img src="/images/logo/logo.png" alt="Logo" className="h-16 w-64" />
+          <img src="/images/logo/logo.png" alt="Logo" className="h-18 w-auto" />
         </div>
         <h1 className="text-2xl font-oswald font-bold text-biro-blue-dark mb-6 text-center">
           Create Admin Account

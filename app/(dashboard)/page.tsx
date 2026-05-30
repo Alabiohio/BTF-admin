@@ -118,7 +118,7 @@ export default async function DashboardOverview() {
           {[
             { title: "Speakers", href: "/speakers", icon: Mic, color: "bg-biro-blue" },
             { title: "Exhibitors", href: "/exhibitors", icon: Building2, color: "bg-biro-blue-dark" },
-            { title: "Sponsors", href: "/sponsors", icon: Gem, color: "bg-signal-red" },
+            { title: "Sponsors", href: "/sponsors", icon: Gem, color: "bg-purple-600" },
             { title: "Volunteers", href: "/volunteers", icon: Users, color: "bg-green-600" },
           ].map((link) => {
             const Icon = link.icon;
