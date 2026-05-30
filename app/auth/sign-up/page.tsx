@@ -40,7 +40,10 @@ export default function SignUpPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md border border-gray-100">
+      <div className="w-full max-w-md p-4">
+        <div className="mb-4 flex justify-center">
+          <img src="/images/logo/logo.png" alt="Logo" className="h-10 w-20" />
+        </div>
         <h1 className="text-2xl font-oswald font-bold text-biro-blue-dark mb-6 text-center">
           Create Admin Account
         </h1>
