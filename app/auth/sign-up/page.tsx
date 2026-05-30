@@ -42,7 +42,7 @@ export default function SignUpPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md p-4">
         <div className="mb-4 flex justify-center">
-          <img src="/images/logo/logo.png" alt="Logo" className="h-10 w-20" />
+          <img src="/images/logo/logo.png" alt="Logo" className="h-16 w-64" />
         </div>
         <h1 className="text-2xl font-oswald font-bold text-biro-blue-dark mb-6 text-center">
           Create Admin Account
