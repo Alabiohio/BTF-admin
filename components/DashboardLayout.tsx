@@ -12,8 +12,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50 text-foreground">
-      <Sidebar isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
-      <TopBar toggleSidebar={toggleSidebar} />
+       <Sidebar isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
+       <TopBar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
       <main className="p-4 sm:p-6 sm:ml-64 mt-16 min-h-[calc(100vh-4rem)]">
         {children}
       </main>
