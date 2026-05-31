@@ -9,8 +9,6 @@ export const {
   signUp,
   signOut,
   useSession,
-  useListSessions,
-  clearAllData,
 } = createAuthClient({
   baseURL,
 });
