@@ -27,7 +27,7 @@ async function getRecentActivity(): Promise<RecentActivity[]> {
       ORDER BY created_at DESC
       LIMIT 5
     `);
-    return res.rows as RecentActivity[];
+    return res.rows as unknown as RecentActivity[];
   } catch (err) {
     console.error("Error fetching recent activity:", err);
     return [];
