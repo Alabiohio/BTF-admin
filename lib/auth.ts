@@ -42,17 +42,6 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
-  cookies: {
-    sessionToken: {
-      name: "better-auth.session_token",
-      attributes: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
-        path: "/",
-      },
-    },
-  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,

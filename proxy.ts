@@ -22,9 +22,16 @@ export default function proxy(request: NextRequest) {
   }
 
   // Better Auth uses this cookie name by default for session tokens
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Check for both possible cookie names
+  const sessionCookie = request.cookies.get("better-auth.session_token") || 
+                        request.cookies.get("auth.session_token") ||
+                        request.cookies.get("auth_session");
    
   const isAuthRoute = pathname.startsWith("/auth");
+
+  // Log all cookies for debugging
+  console.log("Cookies in proxy:", request.cookies.getAll().map(c => c.name));
+  console.log("Session cookie found:", !!sessionCookie);
 
   // Protect the root dashboard and other sensitive routes
   // Redirect to sign-in if the user is not authenticated
