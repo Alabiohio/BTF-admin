@@ -1,4 +1,5 @@
-import { query } from "@/lib/db";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
 import StatsCard from "@/components/StatsCard";
 import SpeakersContent from "./speakers-content";
 
@@ -19,8 +20,8 @@ interface Speaker {
 
 async function getSpeakers(): Promise<Speaker[]> {
   try {
-    const res = await query("SELECT * FROM speaker_registrations ORDER BY created_at DESC");
-    return res.rows;
+    const res = await db.execute(sql`SELECT * FROM speaker_registrations ORDER BY created_at DESC`);
+    return res.rows as Speaker[];
   } catch (err) {
     console.error("Error fetching speakers:", err);
     return [];

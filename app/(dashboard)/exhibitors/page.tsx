@@ -1,4 +1,5 @@
-import { query } from "@/lib/db";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
 import StatsCard from "@/components/StatsCard";
 import ExhibitorsContent from "./exhibitors-content";
 
@@ -17,8 +18,8 @@ interface Exhibitor {
 
 async function getExhibitors(): Promise<Exhibitor[]> {
   try {
-    const res = await query("SELECT * FROM exhibitor_registrations ORDER BY created_at DESC");
-    return res.rows;
+    const res = await db.execute(sql`SELECT * FROM exhibitor_registrations ORDER BY created_at DESC`);
+    return res.rows as Exhibitor[];
   } catch (err) {
     console.error("Error fetching exhibitors:", err);
     return [];

@@ -1,4 +1,5 @@
-import { query } from "@/lib/db";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
 import StatsCard from "@/components/StatsCard";
 import SponsorsContent from "./sponsors-content";
 
@@ -17,8 +18,8 @@ interface Sponsor {
 
 async function getSponsors(): Promise<Sponsor[]> {
   try {
-    const res = await query("SELECT * FROM sponsor_registrations ORDER BY created_at DESC");
-    return res.rows;
+    const res = await db.execute(sql`SELECT * FROM sponsor_registrations ORDER BY created_at DESC`);
+    return res.rows as Sponsor[];
   } catch (err) {
     console.error("Error fetching sponsors:", err);
     return [];

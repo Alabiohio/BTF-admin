@@ -1,4 +1,5 @@
-import { query } from "@/lib/db";
+import { db } from "@/lib/db";
+import { sql } from "drizzle-orm";
 import StatsCard from "@/components/StatsCard";
 import VolunteersContent from "./volunteers-content";
 
@@ -17,8 +18,8 @@ interface Volunteer {
 
 async function getVolunteers(): Promise<Volunteer[]> {
   try {
-    const res = await query("SELECT * FROM volunteer_registrations ORDER BY created_at DESC");
-    return res.rows;
+    const res = await db.execute(sql`SELECT * FROM volunteer_registrations ORDER BY created_at DESC`);
+    return res.rows as Volunteer[];
   } catch (err) {
     console.error("Error fetching volunteers:", err);
     return [];
