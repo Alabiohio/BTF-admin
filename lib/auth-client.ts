@@ -2,7 +2,7 @@
 
 import { createAuthClient } from "better-auth/react";
 
-const baseURL = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000";
+const baseURL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.BETTER_AUTH_URL;
 
 export const {
   signIn,
