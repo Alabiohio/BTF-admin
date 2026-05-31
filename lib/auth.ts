@@ -1,81 +1,44 @@
 import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-import { APIError } from "better-auth/api";
-
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is not set");
-}
-
-if (!process.env.BETTER_AUTH_SECRET) {
-  throw new Error("BETTER_AUTH_SECRET environment variable is not set");
-}
-
-// Parse DATABASE_URL to ensure proper SSL mode for production
-let poolConfig: any = {
-  connectionString: process.env.DATABASE_URL,
-};
-
-if (process.env.NODE_ENV === 'production') {
-  // Use verify-full for production to maintain security
-  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('sslmode=')) {
-    poolConfig.connectionString = `${process.env.DATABASE_URL}${process.env.DATABASE_URL.includes('?') ? '&' : '?'}sslmode=verify-full`;
-  }
-  poolConfig.ssl = { rejectUnauthorized: true };
-} else {
-  poolConfig.ssl = false;
-}
-
-const pool = new Pool(poolConfig);
-
-const baseURL = process.env.BETTER_AUTH_URL || (process.env.NODE_ENV === 'production' ? undefined : "http://localhost:3000");
-
-if (!baseURL) {
-  throw new Error("BETTER_AUTH_URL environment variable is not set in production");
-}
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "./db";
+import * as schema from "./schema";
 
 export const auth = betterAuth({
-  database: pool,
-  baseURL,
-  secret: process.env.BETTER_AUTH_SECRET,
-  session: {
-    cookieCache: {
-      enabled: true,
-    },
-  },
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema,
+  }),
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
+    autoSignIn: true,
   },
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          // Check if the user's email exists in the allowed_signup_emails table
-          try {
-            console.log("Sign-up attempt for email:", user.email.toLowerCase());
-            
-            const res = await pool.query(
-              "SELECT 1 FROM allowed_signup_emails WHERE email = $1",
-              [user.email.toLowerCase()]
-            );
+  baseURL: process.env.BETTER_AUTH_URL,
+  basePath: "/api/auth",
+  secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+  hooks: {
+    before: async (context) => {
+      // Check sign-up email against allowlist
+      if (context.path === "/sign-up" && context.method === "POST") {
+        const body = context.body as Record<string, unknown> | undefined;
+        if (body?.email && typeof body.email === "string") {
+          const email = body.email.toLowerCase();
+          const allowed = await db.query.allowedSignupEmails.findFirst({
+            where: (table, { eq }) => eq(table.email, email),
+          });
 
-            console.log("Allowlist query result:", res.rowCount);
-
-            if (res.rowCount === 0) {
-              console.error("Email not in allowlist:", user.email);
-              throw new APIError("FORBIDDEN", {
-                message: "Email is not authorized for sign up.",
-              });
-            }
-
-            console.log("Email authorized, proceeding with sign-up");
-            return { data: user };
-          } catch (err) {
-            console.error("Error in sign-up hook:", err);
-            throw err;
+          if (!allowed) {
+            return {
+              status: 403,
+              body: JSON.stringify({
+                error: "FORBIDDEN",
+                message: "This email is not allowed to sign up",
+              }),
+            };
           }
-        },
-      },
+        }
+      }
+      return context;
     },
   },
 });

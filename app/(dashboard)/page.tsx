@@ -1,9 +1,10 @@
-import { query } from "@/lib/db";
+import { db } from "@/lib/db";
 import Link from "next/link";
 import { getAuthSession } from "@/lib/auth-session";
 import { redirect } from "next/navigation";
 import StatsCard from "@/components/StatsCard";
 import { Mic, Building2, Gem, Users } from "lucide-react";
+import { sql } from "drizzle-orm";
 
 export const revalidate = 0;
 
@@ -15,7 +16,7 @@ interface RecentActivity {
 
 async function getRecentActivity(): Promise<RecentActivity[]> {
   try {
-    const res = await query(`
+    const res = await db.execute(sql`
       SELECT 'speaker' as type, name, created_at FROM speaker_registrations
       UNION ALL
       SELECT 'exhibitor' as type, name, created_at FROM exhibitor_registrations
@@ -26,7 +27,7 @@ async function getRecentActivity(): Promise<RecentActivity[]> {
       ORDER BY created_at DESC
       LIMIT 5
     `);
-    return res.rows;
+    return res.rows as RecentActivity[];
   } catch (err) {
     console.error("Error fetching recent activity:", err);
     return [];
@@ -50,18 +51,18 @@ export default async function DashboardOverview() {
 
   try {
     const [speakersRes, exhibitorsRes, sponsorsRes, volunteersRes] = await Promise.all([
-      query("SELECT COUNT(*) FROM speaker_registrations"),
-      query("SELECT COUNT(*) FROM exhibitor_registrations"),
-      query("SELECT COUNT(*) FROM sponsor_registrations"),
-      query("SELECT COUNT(*) FROM volunteer_registrations"),
+      db.execute(sql`SELECT COUNT(*) FROM speaker_registrations`),
+      db.execute(sql`SELECT COUNT(*) FROM exhibitor_registrations`),
+      db.execute(sql`SELECT COUNT(*) FROM sponsor_registrations`),
+      db.execute(sql`SELECT COUNT(*) FROM volunteer_registrations`),
     ]);
     recentActivity = await getRecentActivity();
 
     counts = {
-      speakers: parseInt(speakersRes.rows[0].count, 10),
-      exhibitors: parseInt(exhibitorsRes.rows[0].count, 10),
-      sponsors: parseInt(sponsorsRes.rows[0].count, 10),
-      volunteers: parseInt(volunteersRes.rows[0].count, 10),
+      speakers: parseInt((speakersRes.rows[0] as any).count, 10),
+      exhibitors: parseInt((exhibitorsRes.rows[0] as any).count, 10),
+      sponsors: parseInt((sponsorsRes.rows[0] as any).count, 10),
+      volunteers: parseInt((volunteersRes.rows[0] as any).count, 10),
     };
   } catch (err) {
     console.error("Error fetching counts:", err);
