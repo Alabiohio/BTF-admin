@@ -37,6 +37,22 @@ export const auth = betterAuth({
   database: pool,
   baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
+  session: {
+    cookieCache: {
+      enabled: true,
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: "better-auth.session_token",
+      attributes: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
+        path: "/",
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
