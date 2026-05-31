@@ -19,7 +19,7 @@ interface Exhibitor {
 async function getExhibitors(): Promise<Exhibitor[]> {
   try {
     const res = await db.execute(sql`SELECT * FROM exhibitor_registrations ORDER BY created_at DESC`);
-    return res.rows as Exhibitor[];
+    return res.rows as unknown as Exhibitor[];
   } catch (err) {
     console.error("Error fetching exhibitors:", err);
     return [];

@@ -21,7 +21,7 @@ interface Speaker {
 async function getSpeakers(): Promise<Speaker[]> {
   try {
     const res = await db.execute(sql`SELECT * FROM speaker_registrations ORDER BY created_at DESC`);
-    return res.rows as Speaker[];
+    return res.rows as unknown as Speaker[];
   } catch (err) {
     console.error("Error fetching speakers:", err);
     return [];

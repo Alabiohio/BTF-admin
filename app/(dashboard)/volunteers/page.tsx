@@ -19,7 +19,7 @@ interface Volunteer {
 async function getVolunteers(): Promise<Volunteer[]> {
   try {
     const res = await db.execute(sql`SELECT * FROM volunteer_registrations ORDER BY created_at DESC`);
-    return res.rows as Volunteer[];
+    return res.rows as unknown as Volunteer[];
   } catch (err) {
     console.error("Error fetching volunteers:", err);
     return [];
