@@ -10,10 +10,22 @@ if (!process.env.BETTER_AUTH_SECRET) {
   throw new Error("BETTER_AUTH_SECRET environment variable is not set");
 }
 
-const pool = new Pool({
+// Parse DATABASE_URL to ensure proper SSL mode for production
+let poolConfig: any = {
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+};
+
+if (process.env.NODE_ENV === 'production') {
+  // Use verify-full for production to maintain security
+  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('sslmode=')) {
+    poolConfig.connectionString = `${process.env.DATABASE_URL}${process.env.DATABASE_URL.includes('?') ? '&' : '?'}sslmode=verify-full`;
+  }
+  poolConfig.ssl = { rejectUnauthorized: true };
+} else {
+  poolConfig.ssl = false;
+}
+
+const pool = new Pool(poolConfig);
 
 const baseURL = process.env.BETTER_AUTH_URL || (process.env.NODE_ENV === 'production' ? undefined : "http://localhost:3000");
 
