@@ -15,13 +15,20 @@ export default function SignInPage() {
     setError("");
 
     try {
-      await signIn.email({
+      console.log("Attempting sign in with:", { email });
+      console.log("Auth base URL:", process.env.NEXT_PUBLIC_BETTER_AUTH_URL);
+      console.log("Window origin:", typeof window !== 'undefined' ? window.location.origin : 'N/A');
+      
+      const result = await signIn.email({
         email,
         password,
         callbackURL: "/",
       });
+      
+      console.log("Sign in result:", result);
     } catch (err) {
-      setError("An unexpected error occurred.");
+      console.error("Sign in error:", err);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
