@@ -2,14 +2,24 @@ import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import { APIError } from "better-auth/api";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is not set");
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
+const baseURL = process.env.BETTER_AUTH_URL || (process.env.NODE_ENV === 'production' ? undefined : "http://localhost:3000");
+
+if (!baseURL) {
+  throw new Error("BETTER_AUTH_URL environment variable is not set in production");
+}
+
 export const auth = betterAuth({
   database: pool,
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL,
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
