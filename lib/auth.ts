@@ -55,25 +55,36 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    autoSignIn: false,
   },
   databaseHooks: {
     user: {
       create: {
         before: async (user) => {
           // Check if the user's email exists in the allowed_signup_emails table
-          const res = await pool.query(
-            "SELECT 1 FROM allowed_signup_emails WHERE email = $1",
-            [user.email.toLowerCase()]
-          );
+          try {
+            console.log("Sign-up attempt for email:", user.email.toLowerCase());
+            
+            const res = await pool.query(
+              "SELECT 1 FROM allowed_signup_emails WHERE email = $1",
+              [user.email.toLowerCase()]
+            );
 
-          if (res.rowCount === 0) {
-            throw new APIError("FORBIDDEN", {
-              message: "Email is not authorized for sign up.",
-            });
+            console.log("Allowlist query result:", res.rowCount);
+
+            if (res.rowCount === 0) {
+              console.error("Email not in allowlist:", user.email);
+              throw new APIError("FORBIDDEN", {
+                message: "Email is not authorized for sign up.",
+              });
+            }
+
+            console.log("Email authorized, proceeding with sign-up");
+            return { data: user };
+          } catch (err) {
+            console.error("Error in sign-up hook:", err);
+            throw err;
           }
-
-          return { data: user };
         },
       },
     },

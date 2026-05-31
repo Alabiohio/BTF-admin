@@ -28,7 +28,8 @@ export default function SignInPage() {
       console.log("Sign in result:", result);
     } catch (err) {
       console.error("Sign in error:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
+      setError(errorMessage || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }

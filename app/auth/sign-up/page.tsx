@@ -17,14 +17,22 @@ export default function SignUpPage() {
     setError("");
 
     try {
-      await signUp.email({
+      console.log("Attempting sign-up with:", { email, name });
+      console.log("Auth base URL:", process.env.NEXT_PUBLIC_BETTER_AUTH_URL);
+      
+      const result = await signUp.email({
         email,
         password,
         name,
         callbackURL: "/",
       });
+      
+      console.log("Sign-up result:", result);
     } catch (err) {
-      setError("An unexpected error occurred during sign up.");
+      console.error("Sign-up error:", err);
+      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error("Full error details:", err);
+      setError(errorMessage || "An unexpected error occurred during sign up.");
     } finally {
       setIsLoading(false);
     }
