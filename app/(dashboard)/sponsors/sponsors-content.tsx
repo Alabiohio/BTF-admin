@@ -6,6 +6,8 @@ import SearchFilter from "@/components/SearchFilter";
 import ExportButton from "@/components/ExportButton";
 import { Gem } from "lucide-react";
 import { exportRegistrationsToPDF } from "@/lib/export-pdf";
+import { exportRegistrationsToCSV } from "@/lib/export-csv";
+import { exportRegistrationsToExcel } from "@/lib/export-excel";
 
 interface Sponsor {
   id: number;
@@ -40,13 +42,50 @@ export default function SponsorsContent({ sponsors }: { sponsors: Sponsor[] }) {
     });
   }, [sponsors, searchQuery]);
 
-  const handleExport = () => {
-    exportRegistrationsToPDF(
+  const handleExportPDF = async () => {
+    await exportRegistrationsToPDF(
       filteredSponsors,
       "Sponsors",
       ["Date", "Company", "Contact Person", "Interests", "Email", "Phone", "Sponsorship Tier"]
     );
   };
+
+  const handleExportCSV = async () => {
+    await exportRegistrationsToCSV(
+      filteredSponsors,
+      "Sponsors",
+      ["Date", "Company", "Contact Person", "Interests", "Email", "Phone", "Sponsorship Tier"]
+    );
+  };
+
+  const handleExportExcel = async () => {
+    await exportRegistrationsToExcel(
+      filteredSponsors,
+      "Sponsors",
+      ["Date", "Company", "Contact Person", "Interests", "Email", "Phone", "Sponsorship Tier"]
+    );
+  };
+
+  const exportOptions = [
+    {
+      type: "PDF" as const,
+      label: "PDF",
+      description: "Print-ready report with table layout",
+      onExport: handleExportPDF,
+    },
+    {
+      type: "CSV" as const,
+      label: "CSV",
+      description: "Lightweight file for imports and sharing",
+      onExport: handleExportCSV,
+    },
+    {
+      type: "EXCEL" as const,
+      label: "Excel",
+      description: "Spreadsheet format for analysis",
+      onExport: handleExportExcel,
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -59,7 +98,7 @@ export default function SponsorsContent({ sponsors }: { sponsors: Sponsor[] }) {
             />
           </div>
         </div>
-        <ExportButton onExport={handleExport} />
+        <ExportButton options={exportOptions} disabled={filteredSponsors.length === 0} />
       </div>
 
       <div className="text-sm text-gray-600">
