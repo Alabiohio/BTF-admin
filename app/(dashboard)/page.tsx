@@ -14,6 +14,15 @@ interface RecentActivity {
   created_at: string;
 }
 
+type CountRow = {
+  count: string | number | bigint;
+};
+
+function getCount(rows: unknown[]): number {
+  const [row] = rows as CountRow[];
+  return Number(row?.count ?? 0);
+}
+
 async function getRecentActivity(): Promise<RecentActivity[]> {
   try {
     const res = await db.execute(sql`
@@ -59,10 +68,10 @@ export default async function DashboardOverview() {
     recentActivity = await getRecentActivity();
 
     counts = {
-      speakers: parseInt((speakersRes.rows[0] as any).count, 10),
-      exhibitors: parseInt((exhibitorsRes.rows[0] as any).count, 10),
-      sponsors: parseInt((sponsorsRes.rows[0] as any).count, 10),
-      volunteers: parseInt((volunteersRes.rows[0] as any).count, 10),
+      speakers: getCount(speakersRes.rows),
+      exhibitors: getCount(exhibitorsRes.rows),
+      sponsors: getCount(sponsorsRes.rows),
+      volunteers: getCount(volunteersRes.rows),
     };
   } catch (err) {
     console.error("Error fetching counts:", err);
