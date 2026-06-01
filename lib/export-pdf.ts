@@ -101,12 +101,27 @@ export async function exportRegistrationsToPDF<T extends RegistrationRecord>(
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const tableWidth = pageWidth - margin * 2;
-  const firstColumnWidth = fieldLabels.length > 0 ? 25 : tableWidth;
-  const columnWidth =
-    fieldLabels.length > 0
-      ? (tableWidth - firstColumnWidth) / fieldLabels.length
-      : 0;
-  const columnWidths = [firstColumnWidth, ...fieldLabels.map(() => columnWidth)];
+  const firstColumnWidth = fieldLabels.length > 0 ? 20 : tableWidth;
+  const fieldWidthWeights: Record<string, number> = {
+    "Contact Name": 1.25,
+    "Contact Person": 1.25,
+    "Description": 1.6,
+    "Email": 1.55,
+    "Name": 1.25,
+    "Topic": 1.45,
+    "Website": 1.35,
+  };
+  const columnWeights = fieldLabels.map(
+    (label) => fieldWidthWeights[label] || 1
+  );
+  const totalColumnWeight =
+    columnWeights.reduce((total, weight) => total + weight, 0) || 1;
+  const columnWidths = [
+    firstColumnWidth,
+    ...columnWeights.map(
+      (weight) => ((tableWidth - firstColumnWidth) * weight) / totalColumnWeight
+    ),
+  ];
   const rowPadding = 3;
   const lineHeight = 4;
   const tableStartY = 22;
@@ -151,11 +166,35 @@ export async function exportRegistrationsToPDF<T extends RegistrationRecord>(
       return rowData;
     });
 
-  const wrapCellText = (value: string | number, width: number): string[] =>
-    doc.splitTextToSize(
-      String(value),
-      Math.max(width - rowPadding * 2, 4)
-    ) as string[];
+  const wrapCellText = (value: string | number, width: number): string[] => {
+    const maxWidth = Math.max(width - rowPadding * 2, 4);
+    const lines = doc.splitTextToSize(String(value), maxWidth) as string[];
+
+    return lines.flatMap((line) => {
+      if (doc.getTextWidth(line) <= maxWidth) {
+        return line;
+      }
+
+      const chunks: string[] = [];
+      let currentChunk = "";
+
+      Array.from(line).forEach((character) => {
+        const nextChunk = `${currentChunk}${character}`;
+        if (currentChunk && doc.getTextWidth(nextChunk) > maxWidth) {
+          chunks.push(currentChunk);
+          currentChunk = character;
+        } else {
+          currentChunk = nextChunk;
+        }
+      });
+
+      if (currentChunk) {
+        chunks.push(currentChunk);
+      }
+
+      return chunks;
+    });
+  };
 
   const drawTableHeader = (startY: number): number => {
     doc.setFontSize(9);
