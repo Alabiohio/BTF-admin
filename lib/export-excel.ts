@@ -164,7 +164,17 @@ function createZip(files: Array<{ path: string; content: string }>): Blob {
   writeUint32(endRecord, 16, offset);
   writeUint16(endRecord, 20, 0);
 
-  return new Blob([...localParts, ...centralParts, endRecord], {
+  const zipParts = [...localParts, ...centralParts, endRecord];
+  const zipSize = zipParts.reduce((size, part) => size + part.length, 0);
+  const zipData = new Uint8Array(zipSize);
+  let zipOffset = 0;
+
+  zipParts.forEach((part) => {
+    zipData.set(part, zipOffset);
+    zipOffset += part.length;
+  });
+
+  return new Blob([zipData.buffer as ArrayBuffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 }
