@@ -3,7 +3,9 @@
 import { useState, useMemo } from "react";
 import DataCard from "@/components/DataCard";
 import SearchFilter from "@/components/SearchFilter";
+import ExportButton from "@/components/ExportButton";
 import { Mic } from "lucide-react";
+import { exportRegistrationsToPDF } from "@/lib/export-pdf";
 
 interface Speaker {
   id: number;
@@ -37,17 +39,28 @@ export default function SpeakersContent({ speakers }: { speakers: Speaker[] }) {
     });
   }, [speakers, searchQuery]);
 
+  const handleExport = () => {
+    exportRegistrationsToPDF(
+      filteredSpeakers,
+      "Speakers",
+      ["Date", "Name", "Email", "Phone", "Topic", "Application Type"]
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <SearchFilter
-          onSearch={setSearchQuery}
-          placeholder="Search by name, email, phone, or topic..."
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <SearchFilter
+              onSearch={setSearchQuery}
+              placeholder="Search by name, email, phone, or topic..."
+            />
+          </div>
+        </div>
+        <ExportButton onExport={handleExport} />
       </div>
 
-      {/* Results Count */}
       <div className="text-sm text-gray-600">
         {searchQuery ? (
           <span>Found {filteredSpeakers.length} result{filteredSpeakers.length !== 1 ? "s" : ""}</span>
@@ -56,7 +69,6 @@ export default function SpeakersContent({ speakers }: { speakers: Speaker[] }) {
         )}
       </div>
 
-      {/* Cards Grid */}
       {filteredSpeakers.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <Mic className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -75,10 +87,10 @@ export default function SpeakersContent({ speakers }: { speakers: Speaker[] }) {
               }}
               fields={[
                 { label: "Date", value: new Date(speaker.created_at).toLocaleDateString(), icon: "calendar" },
+                { label: "Topic", value: speaker.topic, icon: "topic" },
                 { label: "Name", value: speaker.name, icon: "user" },
                 { label: "Email", value: speaker.email, icon: "email" },
                 { label: "Phone", value: speaker.phone, icon: "phone" },
-                { label: "Topic", value: speaker.topic, icon: "topic" },
               ]}
             />
           ))}

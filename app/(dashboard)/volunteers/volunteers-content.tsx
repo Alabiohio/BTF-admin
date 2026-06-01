@@ -3,7 +3,9 @@
 import { useState, useMemo } from "react";
 import DataCard from "@/components/DataCard";
 import SearchFilter from "@/components/SearchFilter";
+import ExportButton from "@/components/ExportButton";
 import { Users } from "lucide-react";
+import { exportRegistrationsToPDF } from "@/lib/export-pdf";
 
 interface Volunteer {
   id: number;
@@ -31,17 +33,28 @@ export default function VolunteersContent({ volunteers }: { volunteers: Voluntee
     });
   }, [volunteers, searchQuery]);
 
+  const handleExport = () => {
+    exportRegistrationsToPDF(
+      filteredVolunteers,
+      "Volunteers",
+      ["Date", "Name", "Skills", "Availability", "Email", "Phone"]
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <SearchFilter
-          onSearch={setSearchQuery}
-          placeholder="Search by name, email, phone, or skills..."
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <SearchFilter
+              onSearch={setSearchQuery}
+              placeholder="Search by name, email, phone, or skills..."
+            />
+          </div>
+        </div>
+        <ExportButton onExport={handleExport} />
       </div>
 
-      {/* Results Count */}
       <div className="text-sm text-gray-600">
         {searchQuery ? (
           <span>Found {filteredVolunteers.length} result{filteredVolunteers.length !== 1 ? "s" : ""}</span>
@@ -50,7 +63,6 @@ export default function VolunteersContent({ volunteers }: { volunteers: Voluntee
         )}
       </div>
 
-      {/* Cards Grid */}
       {filteredVolunteers.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -66,10 +78,10 @@ export default function VolunteersContent({ volunteers }: { volunteers: Voluntee
               fields={[
                 { label: "Date", value: new Date(volunteer.created_at).toLocaleDateString(), icon: "calendar" },
                 { label: "Name", value: volunteer.name, icon: "user" },
-                { label: "Email", value: volunteer.email, icon: "email" },
-                { label: "Phone", value: volunteer.phone, icon: "phone" },
                 { label: "Skills", value: volunteer.skills, icon: "skills" },
                 { label: "Availability", value: volunteer.availability },
+                { label: "Email", value: volunteer.email, icon: "email" },
+                { label: "Phone", value: volunteer.phone, icon: "phone" },
               ]}
             />
           ))}

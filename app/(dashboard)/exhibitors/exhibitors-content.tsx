@@ -3,7 +3,9 @@
 import { useState, useMemo } from "react";
 import DataCard from "@/components/DataCard";
 import SearchFilter from "@/components/SearchFilter";
+import ExportButton from "@/components/ExportButton";
 import { Building2 } from "lucide-react";
+import { exportRegistrationsToPDF } from "@/lib/export-pdf";
 
 interface Exhibitor {
   id: number;
@@ -31,17 +33,28 @@ export default function ExhibitorsContent({ exhibitors }: { exhibitors: Exhibito
     });
   }, [exhibitors, searchQuery]);
 
+  const handleExport = () => {
+    exportRegistrationsToPDF(
+      filteredExhibitors,
+      "Exhibitors",
+      ["Date", "Company", "Description", "Contact Name", "Email", "Phone", "Website"]
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <SearchFilter
-          onSearch={setSearchQuery}
-          placeholder="Search by name, company, email, or phone..."
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1">
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <SearchFilter
+              onSearch={setSearchQuery}
+              placeholder="Search by name, company, email, or phone..."
+            />
+          </div>
+        </div>
+        <ExportButton onExport={handleExport} />
       </div>
 
-      {/* Results Count */}
       <div className="text-sm text-gray-600">
         {searchQuery ? (
           <span>Found {filteredExhibitors.length} result{filteredExhibitors.length !== 1 ? "s" : ""}</span>
@@ -50,7 +63,6 @@ export default function ExhibitorsContent({ exhibitors }: { exhibitors: Exhibito
         )}
       </div>
 
-      {/* Cards Grid */}
       {filteredExhibitors.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -66,6 +78,7 @@ export default function ExhibitorsContent({ exhibitors }: { exhibitors: Exhibito
               fields={[
                 { label: "Date", value: new Date(exhibitor.created_at).toLocaleDateString(), icon: "calendar" },
                 { label: "Company", value: exhibitor.company, icon: "company" },
+                { label: "Description", value: exhibitor.description, icon: "topic" },
                 { label: "Contact Name", value: exhibitor.name, icon: "user" },
                 { label: "Email", value: exhibitor.email, icon: "email" },
                 { label: "Phone", value: exhibitor.phone, icon: "phone" },
