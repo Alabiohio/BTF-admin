@@ -2,8 +2,21 @@
 
 import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+
+type AuthClientResult = {
+  data?: {
+    redirect?: boolean;
+    url?: string | null;
+  } | null;
+  error?: {
+    message?: string;
+    statusText?: string;
+  } | null;
+};
 
 export default function SignInPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,13 +32,31 @@ export default function SignInPage() {
       console.log("Auth base URL:", process.env.NEXT_PUBLIC_BETTER_AUTH_URL);
       console.log("Window origin:", typeof window !== 'undefined' ? window.location.origin : 'N/A');
       
-      const result = await signIn.email({
+      const result = (await signIn.email({
         email,
         password,
         callbackURL: "/",
-      });
+      })) as AuthClientResult;
       
       console.log("Sign in result:", result);
+
+      if (result.error) {
+        setError(
+          result.error.message ||
+            result.error.statusText ||
+            "Invalid email or password.",
+        );
+        return;
+      }
+
+      if (result.data?.url) {
+        router.push(result.data.url);
+        router.refresh();
+        return;
+      }
+
+      router.push("/");
+      router.refresh();
     } catch (err) {
       console.error("Sign in error:", err);
       const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);

@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  const sessionToken = request.cookies.get("better-auth.session_token");
+  const sessionToken =
+    request.cookies.get("better-auth.session_token") ??
+    request.cookies.get("__Secure-better-auth.session_token");
   const pathname = request.nextUrl.pathname;
 
   // Allow auth routes without session
