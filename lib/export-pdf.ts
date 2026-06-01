@@ -10,14 +10,15 @@ interface RegistrationRecord {
   phone?: string;
   topic?: string;
   company?: string;
+  company_name?: string;
   contact_person?: string;
   website?: string | null;
   description?: string | null;
+  interests?: string | null;
   skills?: string | null;
   availability?: string | null;
   application_type?: string;
   sponsorship_tier?: string | null;
-  [key: string]: unknown;
 }
 
 const BIRO_BLUE: [number, number, number] = [49, 126, 254];
@@ -131,10 +132,12 @@ export async function exportRegistrationsToPDF<T extends RegistrationRecord>(
         "Email": record.email,
         "Phone": record.phone,
         "Topic": record.topic,
-        "Company": record.company,
+        "Company": record.company || record.company_name,
+        "Contact Name": record.name,
         "Contact Person": record.contact_person,
         "Website": record.website || undefined,
         "Description": record.description || undefined,
+        "Interests": record.interests || undefined,
         "Skills": record.skills || undefined,
         "Availability": record.availability || undefined,
         "Application Type": record.application_type || undefined,
